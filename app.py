@@ -100,6 +100,9 @@ def dashboard():
                 'last_access': last_access_text, 'hosts_count': len(p['hosts']),
                 'status_color': color_class
             })
+        proxies_not_now = [
+            proxy for proxy in proxies_list if proxy['last_access'] != "Agora"
+        ]
         zapi.user.logout()
         app.logger.info("Dados do Zabbix coletados com sucesso.")
     except Exception as e:
@@ -108,7 +111,11 @@ def dashboard():
         return render_template('index.html', server_summary=None, proxies=None)
 
     formatted_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    return render_template('index.html', server_summary=server_summary, proxies=proxies_list, last_updated=formatted_time)
+    return render_template('index.html', 
+                           server_summary=server_summary, 
+                           proxies=proxies_list, 
+                           proxies_not_now=proxies_not_now, 
+                           last_updated=formatted_time)
 
 if __name__ == '__main__':
     app.logger.info("Aplicação iniciada em modo de debug.")

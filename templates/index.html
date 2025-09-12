@@ -26,6 +26,36 @@
             {% endif %}
         {% endwith %}
 
+        <h3 class="mt-4">Proxies com Último Acesso Diferente de "Agora"</h3>
+        <div class="card">
+            <table class="table table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nome do Proxy</th>
+                        <th>Modo</th>
+                        <th>Último Acesso</th>
+                        <th>Hosts Monitorados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proxy in proxies_not_now %}
+                    <tr>
+                        <td>{{ proxy.name }}</td>
+                        <td>{{ proxy.mode }}</td>
+                        <td>
+                            <span class="badge bg-{{ proxy.status_color }}">{{ proxy.last_access }}</span>
+                        </td>
+                        <td class="text-center">{{ proxy.hosts_count }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">Nenhum proxy encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
         {% if server_summary %}
         <h3 class="mt-4">Resumo do Servidor</h3>
         <div class="row text-center">
