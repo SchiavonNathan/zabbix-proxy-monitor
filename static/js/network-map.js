@@ -187,15 +187,53 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.lineWidth = 2;
             ctx.stroke();
             
-            // Add pulse effect on the line
-            const pulsePosition = (Date.now() % 3000) / 3000; // Cycle every 3 seconds
-            const pulseX = positions.server.x + (node.x - positions.server.x) * pulsePosition;
-            const pulseY = positions.server.y + (node.y - positions.server.y) * pulsePosition;
+            // Enhanced fluid animation with multiple pulses
+            const baseCycleTime = 2000; // Faster cycle: 2 seconds instead of 3
+            const now = Date.now();
             
-            ctx.beginPath();
-            ctx.arc(pulseX, pulseY, 3, 0, Math.PI * 2);
-            ctx.fillStyle = '#00b894';
-            ctx.fill();
+            // Calculate the distance between server and proxy for proper spacing
+            const distance = Math.sqrt(
+                Math.pow(node.x - positions.server.x, 2) + 
+                Math.pow(node.y - positions.server.y, 2)
+            );
+            
+            // Number of pulses based on distance (more pulses for longer lines)
+            const numPulses = Math.max(2, Math.floor(distance / 120));
+            
+            // Draw multiple pulse dots with different timing offsets
+            for (let i = 0; i < numPulses; i++) {
+                // Stagger the pulses evenly across the line
+                const offset = i * (1 / numPulses);
+                const adjustedPosition = ((now % baseCycleTime) / baseCycleTime + offset) % 1;
+                
+                // Calculate position along the line
+                const pulseX = positions.server.x + (node.x - positions.server.x) * adjustedPosition;
+                const pulseY = positions.server.y + (node.y - positions.server.y) * adjustedPosition;
+                
+                // Fade out pulses as they reach their destination
+                const fadeEffect = Math.sin(adjustedPosition * Math.PI);
+                const pulseSize = 2 + fadeEffect * 2; // Size varies from 2 to 4
+                
+                // Draw the pulse with trail effect
+                const pulseGradient = ctx.createRadialGradient(
+                    pulseX, pulseY, 0,
+                    pulseX, pulseY, pulseSize * 2
+                );
+                
+                pulseGradient.addColorStop(0, 'rgba(0, 184, 148, ' + (0.8 * fadeEffect) + ')');
+                pulseGradient.addColorStop(1, 'rgba(0, 184, 148, 0)');
+                
+                ctx.beginPath();
+                ctx.arc(pulseX, pulseY, pulseSize * 2, 0, Math.PI * 2);
+                ctx.fillStyle = pulseGradient;
+                ctx.fill();
+                
+                // Core of the pulse
+                ctx.beginPath();
+                ctx.arc(pulseX, pulseY, pulseSize, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 184, 148, ' + (0.9 * fadeEffect) + ')';
+                ctx.fill();
+            }
         }
         
         // Draw node based on type
