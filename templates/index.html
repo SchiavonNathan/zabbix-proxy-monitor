@@ -6,110 +6,201 @@
     <meta http-equiv="refresh" content="60">
     <title>Dashboard Zabbix</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="bg-light">
-
-    <div class="container mt-4">
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #001f3f;">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-bar-chart-line-fill me-2"></i>
+                Zabbix Monitor
+            </a>
+            <span class="navbar-text text-light">
+                <i class="bi bi-clock me-1"></i> {{ last_updated }}
+            </span>
+        </div>
+    </nav>
+    
+    <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="mb-0">📊 Dashboard Zabbix</h1>
-            <span class="text-muted">Atualizado em {{ last_updated }}</span>
+            <h1 class="h2">Dashboard de Monitoramento</h1>
+            <span class="badge bg-info text-dark">
+                <i class="bi bi-arrow-repeat me-1"></i> Atualização automática: 60s
+            </span>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }}" role="alert">
-                    {{ message }}
+                <div class="alert-container mb-4">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }}" role="alert">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <h3 class="mt-4">Proxies com Último Acesso Diferente de "Agora"</h3>
-        <div class="card">
-            <table class="table table-striped table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Nome do Proxy</th>
-                        <th>Modo</th>
-                        <th>Último Acesso</th>
-                        <th>Hosts Monitorados</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for proxy in proxies_not_now %}
-                    <tr>
-                        <td>{{ proxy.name }}</td>
-                        <td>{{ proxy.mode }}</td>
-                        <td>
-                            <span class="badge bg-{{ proxy.status_color }}">{{ proxy.last_access }}</span>
-                        </td>
-                        <td class="text-center">{{ proxy.hosts_count }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center">Nenhum proxy encontrado.</td>
-                    </tr>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container mb-4">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} d-flex align-items-center" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div>{{ message }}</div>
+                    </div>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <section class="mb-4">
+            <div class="card card-alert">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        Proxies com Acesso Não Atualizado
+                    </h2>
+                    <span class="badge bg-warning text-dark">Atenção Necessária</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-server me-2"></i>Nome do Proxy</th>
+                                <th><i class="bi bi-gear me-2"></i>Modo</th>
+                                <th><i class="bi bi-clock-history me-2"></i>Último Acesso</th>
+                                <th><i class="bi bi-pc-display me-2"></i>Hosts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proxy in proxies_not_now %}
+                            <tr>
+                                <td>{{ proxy.name }}</td>
+                                <td>{{ proxy.mode }}</td>
+                                <td>
+                                    <span class="badge bg-{{ proxy.status_color }}">{{ proxy.last_access }}</span>
+                                </td>
+                                <td class="text-center">{{ proxy.hosts_count }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Todos os proxies estão atualizados!
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
         {% if server_summary %}
-        <h3 class="mt-4">Resumo do Servidor</h3>
-        <div class="row text-center">
-            <div class="col-md-4">
-                <div class="card p-3 mb-2">
-                    <h5>Total de Hosts</h5>
-                    <p class="display-5">{{ server_summary.total_hosts }}</p>
+        <section class="mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">
+                        <i class="bi bi-speedometer2 me-2"></i>
+                        Resumo do Servidor
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="stat-card text-center py-3 h-100">
+                                <div class="stat-icon mb-2">
+                                    <i class="bi bi-pc-display fs-1 text-primary"></i>
+                                </div>
+                                <h5 class="stat-title">Total de Hosts</h5>
+                                <p class="display-6 fw-bold mb-0">{{ server_summary.total_hosts }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card text-center py-3 h-100">
+                                <div class="stat-icon mb-2">
+                                    <i class="bi bi-list-check fs-1 text-primary"></i>
+                                </div>
+                                <h5 class="stat-title">Total de Itens</h5>
+                                <p class="display-6 fw-bold mb-0">{{ server_summary.total_items }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card text-center py-3 h-100 {{ 'border-danger' if server_summary.problemas_color == 'danger' else '' }}">
+                                <div class="stat-icon mb-2">
+                                    <i class="bi bi-exclamation-triangle fs-1 text-{{ server_summary.problemas_color }}"></i>
+                                </div>
+                                <h5 class="stat-title">Problemas Ativos</h5>
+                                <p class="display-6 fw-bold text-{{ server_summary.problemas_color }} mb-0">{{ server_summary.problemas_ativos }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card p-3 mb-2">
-                    <h5>Total de Itens</h5>
-                    <p class="display-5">{{ server_summary.total_items }}</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-3 mb-2 border-{{ server_summary.problemas_color }}">
-                    <h5>Problemas Ativos</h5>
-                    <p class="display-5 text-{{ server_summary.problemas_color }}">{{ server_summary.problemas_ativos }}</p>
-                </div>
-            </div>
-        </div>
+        </section>
 
-        <h3 class="mt-5">Status dos Proxies</h3>
-        <div class="card">
-            <table class="table table-striped table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Nome do Proxy</th>
-                        <th>Modo</th>
-                        <th>Último Acesso</th>
-                        <th>Hosts Monitorados</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for proxy in proxies %}
-                    <tr>
-                        <td>{{ proxy.name }}</td>
-                        <td>{{ proxy.mode }}</td>
-                        <td>
-                            <span class="badge bg-{{ proxy.status_color }}">{{ proxy.last_access }}</span>
-                        </td>
-                        <td class="text-center">{{ proxy.hosts_count }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center">Nenhum proxy encontrado.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <section>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">
+                        <i class="bi bi-hdd-network me-2"></i>
+                        Status dos Proxies
+                    </h2>
+                    <span class="badge bg-primary">Total: {{ proxies|length }}</span>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-server me-2"></i>Nome do Proxy</th>
+                                <th><i class="bi bi-gear me-2"></i>Modo</th>
+                                <th><i class="bi bi-clock-history me-2"></i>Último Acesso</th>
+                                <th><i class="bi bi-pc-display me-2"></i>Hosts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proxy in proxies %}
+                            <tr>
+                                <td>{{ proxy.name }}</td>
+                                <td>
+                                    {% if proxy.mode == 'Ativo' %}
+                                    <span class="badge bg-success">Ativo</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Passivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ proxy.status_color }}">{{ proxy.last_access }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold">{{ proxy.hosts_count }}</span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3">
+                                    <i class="bi bi-exclamation-circle text-warning me-2"></i>
+                                    Nenhum proxy encontrado.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
         {% endif %}
     </div>
-
+    
+    <footer class="footer py-3 mt-4" style="background-color: #001f3f;">
+        <div class="container text-center">
+            <span class="text-light">
+                <i class="bi bi-graph-up"></i> Dashboard Zabbix © 2025
+            </span>
+        </div>
+    </footer>
 </body>
 </html>
