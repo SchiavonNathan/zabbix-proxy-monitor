@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Draw a node (server or proxy)
     function drawNode(node) {
-        // Draw connection line to server for proxies with animation effect
+        // Draw connection line to server for proxies without animation effect
         if (node.type === 'proxy') {
             // Create gradient for the connection line
             const gradient = ctx.createLinearGradient(
@@ -187,53 +187,15 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.lineWidth = 2;
             ctx.stroke();
             
-            // Enhanced fluid animation with multiple pulses
-            const baseCycleTime = 2000; // Faster cycle: 2 seconds instead of 3
-            const now = Date.now();
+            // Optional: add a subtle glow effect to the line (non-animated)
+            ctx.beginPath();
+            ctx.moveTo(positions.server.x, positions.server.y);
+            ctx.lineTo(node.x, node.y);
+            ctx.strokeStyle = 'rgba(0, 184, 148, 0.1)';
+            ctx.lineWidth = 4;
+            ctx.stroke();
             
-            // Calculate the distance between server and proxy for proper spacing
-            const distance = Math.sqrt(
-                Math.pow(node.x - positions.server.x, 2) + 
-                Math.pow(node.y - positions.server.y, 2)
-            );
-            
-            // Number of pulses based on distance (more pulses for longer lines)
-            const numPulses = Math.max(2, Math.floor(distance / 120));
-            
-            // Draw multiple pulse dots with different timing offsets
-            for (let i = 0; i < numPulses; i++) {
-                // Stagger the pulses evenly across the line
-                const offset = i * (1 / numPulses);
-                const adjustedPosition = ((now % baseCycleTime) / baseCycleTime + offset) % 1;
-                
-                // Calculate position along the line
-                const pulseX = positions.server.x + (node.x - positions.server.x) * adjustedPosition;
-                const pulseY = positions.server.y + (node.y - positions.server.y) * adjustedPosition;
-                
-                // Fade out pulses as they reach their destination
-                const fadeEffect = Math.sin(adjustedPosition * Math.PI);
-                const pulseSize = 2 + fadeEffect * 2; // Size varies from 2 to 4
-                
-                // Draw the pulse with trail effect
-                const pulseGradient = ctx.createRadialGradient(
-                    pulseX, pulseY, 0,
-                    pulseX, pulseY, pulseSize * 2
-                );
-                
-                pulseGradient.addColorStop(0, 'rgba(0, 184, 148, ' + (0.8 * fadeEffect) + ')');
-                pulseGradient.addColorStop(1, 'rgba(0, 184, 148, 0)');
-                
-                ctx.beginPath();
-                ctx.arc(pulseX, pulseY, pulseSize * 2, 0, Math.PI * 2);
-                ctx.fillStyle = pulseGradient;
-                ctx.fill();
-                
-                // Core of the pulse
-                ctx.beginPath();
-                ctx.arc(pulseX, pulseY, pulseSize, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 184, 148, ' + (0.9 * fadeEffect) + ')';
-                ctx.fill();
-            }
+            // Animation removed - no more moving pulses
         }
         
         // Draw node based on type
@@ -548,13 +510,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Draw server node
         drawNode(positions.server);
         
-        // Draw proxy nodes (no breathing animation)
+        // Draw proxy nodes (no animation)
         positions.proxies.forEach(proxy => {
             drawNode(proxy);
         });
         
-        // Request next animation frame (but at a much slower rate since we're not animating)
-        setTimeout(() => requestAnimationFrame(drawMap), 1000);
+        // Refresh much less frequently since we have no animations
+        setTimeout(() => requestAnimationFrame(drawMap), 5000); // Only update every 5 seconds
     }
     
     // Draw an enhanced background pattern
@@ -571,7 +533,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillRect(0, 0, width, height);
         
         // Add subtle noise texture
-        const noiseIntensity = 0.03;
+        const noiseIntensity = 0.02; // Reduced noise intensity for a cleaner look
         const imageData = ctx.getImageData(0, 0, width, height);
         const data = imageData.data;
         
@@ -628,21 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.stroke();
         }
         
-        // Add some subtle light spots
-        for (let i = 0; i < 10; i++) {
-            const x = Math.random() * width;
-            const y = Math.random() * height;
-            const radius = Math.random() * 100 + 50;
-            
-            const spotGradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-            spotGradient.addColorStop(0, 'rgba(100, 200, 255, 0.03)');
-            spotGradient.addColorStop(1, 'rgba(100, 200, 255, 0)');
-            
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fillStyle = spotGradient;
-            ctx.fill();
-        }
+        // Removed the "subtle light spots" that were causing the blinking white lights in the background
     }
     
     // Initialize positions and start the animation loop
@@ -650,45 +598,82 @@ document.addEventListener('DOMContentLoaded', function() {
     // Start the animation loop
     requestAnimationFrame(drawMap);
     
-    // Show tooltip on hover
-    canvas.addEventListener('mousemove', function(event) {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        
-        // Check if mouse is over any proxy
-        let hoveredNode = null;
-        
+    // Variables for drag functionality
+    let isDragging = false;
+    let draggedNode = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let lastHoveredNode = null;
+    
+    // Get node under cursor
+    function getNodeUnderCursor(x, y) {
         // Check server node
         const dx = x - positions.server.x;
         const dy = y - positions.server.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance <= positions.server.radius) {
-            hoveredNode = positions.server;
+            return positions.server; // Server is not draggable, but we need to detect hover
         }
         
         // Check proxy nodes
-        if (!hoveredNode) {
-            for (const proxy of positions.proxies) {
-                const dx = x - proxy.x;
-                const dy = y - proxy.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance <= proxy.radius) {
-                    hoveredNode = proxy;
-                    break;
-                }
+        for (const proxy of positions.proxies) {
+            const dx = x - proxy.x;
+            const dy = y - proxy.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance <= proxy.radius) {
+                return proxy;
             }
         }
         
-        // Show enhanced tooltip if hovering over a node
+        return null;
+    }
+    
+    // Show tooltip and handle cursor style
+    function handleMouseMove(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // If currently dragging a node
+        if (isDragging && draggedNode && draggedNode.type === 'proxy') {
+            // Hide tooltip during drag
+            const tooltip = document.getElementById('map-tooltip');
+            tooltip.style.display = 'none';
+            
+            // Update node position
+            draggedNode.x = x - offsetX;
+            draggedNode.y = y - offsetY;
+            
+            // Keep node within bounds of the canvas
+            draggedNode.x = Math.max(draggedNode.radius, Math.min(width - draggedNode.radius, draggedNode.x));
+            draggedNode.y = Math.max(draggedNode.radius, Math.min(height - draggedNode.radius, draggedNode.y));
+            
+            // Redraw map
+            drawMap();
+            return;
+        }
+        
+        // Get node under cursor
+        const hoveredNode = getNodeUnderCursor(x, y);
+        
+        // Update cursor style
+        if (hoveredNode && hoveredNode.type === 'proxy') {
+            canvas.style.cursor = 'grab';
+        } else {
+            canvas.style.cursor = 'default';
+        }
+        
+        // Handle tooltip display
         const tooltip = document.getElementById('map-tooltip');
         
         if (hoveredNode) {
+            lastHoveredNode = hoveredNode;
+            
             tooltip.style.display = 'block';
-            tooltip.style.left = (event.clientX + 5) + 'px'; // Closer tooltip
-            tooltip.style.top = (event.clientY + 5) + 'px'; // Closer tooltip
+            tooltip.style.left = (event.clientX + 5) + 'px';
+            tooltip.style.top = (event.clientY + 5) + 'px';
             
             if (hoveredNode.type === 'server') {
                 tooltip.innerHTML = `
@@ -741,13 +726,16 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="bi bi-pc-display me-1"></i>${hoveredNode.hosts}
                             </span>
                         </div>
+                        <div class="tooltip-hint mt-2">
+                            <i class="bi bi-arrows-move me-1"></i>
+                            Clique e arraste para mover
+                        </div>
                     </div>
                 `;
             }
             
             // Highlight the connection
             if (hoveredNode.type === 'proxy') {
-                // Store the original node for connection highlighting
                 canvas.setAttribute('data-highlighted-node', JSON.stringify({
                     x: hoveredNode.x,
                     y: hoveredNode.y
@@ -756,14 +744,62 @@ document.addEventListener('DOMContentLoaded', function() {
                 canvas.removeAttribute('data-highlighted-node');
             }
         } else {
+            lastHoveredNode = null;
             tooltip.style.display = 'none';
             canvas.removeAttribute('data-highlighted-node');
         }
-    });
+    }
     
-    // Hide tooltip when mouse leaves canvas
-    canvas.addEventListener('mouseleave', function() {
+    // Start dragging
+    function handleMouseDown(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // Check if click is on a proxy node
+        const node = getNodeUnderCursor(x, y);
+        
+        if (node && node.type === 'proxy') {
+            isDragging = true;
+            draggedNode = node;
+            offsetX = x - node.x;
+            offsetY = y - node.y;
+            canvas.style.cursor = 'grabbing';
+            
+            // Hide tooltip while dragging
+            const tooltip = document.getElementById('map-tooltip');
+            tooltip.style.display = 'none';
+        }
+    }
+    
+    // End dragging
+    function handleMouseUp() {
+        if (isDragging) {
+            canvas.style.cursor = lastHoveredNode ? 'grab' : 'default';
+            isDragging = false;
+            draggedNode = null;
+            
+            // Redraw map with final positions
+            drawMap();
+        }
+    }
+    
+    // Mouse leave handler - stop dragging and hide tooltip
+    function handleMouseLeave() {
         const tooltip = document.getElementById('map-tooltip');
         tooltip.style.display = 'none';
-    });
+        
+        // Also cancel any ongoing drag operation
+        if (isDragging) {
+            isDragging = false;
+            draggedNode = null;
+            canvas.style.cursor = 'default';
+        }
+    }
+    
+    // Register event listeners
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
 });
