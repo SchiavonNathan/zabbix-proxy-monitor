@@ -13,7 +13,7 @@ body {
 
 h1, h2, h3, h4, h5 {
     font-weight: 700;
-    color: #001f3f;
+    color: #ffffff;
 }
 
 .card {
@@ -32,6 +32,132 @@ h1, h2, h3, h4, h5 {
 .stat-card:hover, .info-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+.server-stat-card {
+    padding: 1.5rem;
+    border-radius: 0;
+    transition: all 0.3s ease;
+    background-color: #002746;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.server-stat-card:hover {
+    background-color: #00305a;
+    transform: translateY(-2px);
+}
+
+.server-stat-card .stat-title {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.icon-circle i {
+    font-size: 28px;
+    color: white;
+}
+
+.bg-primary-gradient {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+}
+
+.bg-success-gradient {
+    background: linear-gradient(135deg, #10b981, #047857);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+}
+
+.bg-warning-gradient {
+    background: linear-gradient(135deg, #f59e0b, #b45309);
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);
+}
+
+.bg-danger-gradient {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+}
+
+.bg-info-gradient {
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+}
+
+
+.metric-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background-color: #002746;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    background-color: #00305a;
+}
+
+.metric-icon {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(59, 130, 246, 0.15);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.metric-icon i {
+    font-size: 20px;
+    color: #3b82f6;
+}
+
+.metric-content {
+    flex: 1;
+}
+
+.metric-title {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.metric-value {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.metric-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+
+.chart-container {
+    background-color: #002746;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .info-card {
@@ -91,7 +217,7 @@ section:last-of-type .card-header {
     color: #ffffff;
 }
 
-/* Special styling for the proxies not updated table */
+
 .card-alert .table td {
     padding: 0.65rem 0.75rem;
     font-size: 0.92rem;
@@ -105,7 +231,7 @@ section:last-of-type .card-header {
     text-overflow: ellipsis;
 }
 
-/* Main proxies status table styling */
+
 section:last-of-type .table {
     color: #ffffff;
     background-color: transparent !important;
@@ -146,7 +272,7 @@ section:last-of-type .table th {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Enhanced badge styles for card-alert */
+
 .card-alert .badge {
     display: inline-flex;
     align-items: center;
@@ -157,7 +283,7 @@ section:last-of-type .table th {
     margin-left: auto;
 }
 
-/* Main table badge styles */
+
 section:last-of-type .badge {
     font-size: 0.8rem;
     padding: 0.35rem 0.7rem;
@@ -192,7 +318,7 @@ section:last-of-type .badge.bg-secondary {
     border: 1px solid rgba(156, 163, 175, 0.3);
 }
 
-/* Status indicator */
+
 .status-indicator {
     width: 10px;
     height: 10px;
@@ -269,12 +395,12 @@ section:last-of-type .badge.bg-secondary {
     font-weight: 600;
 }
 
-/* Remove all rounded corners from Bootstrap components */
+
 .btn, .alert, .form-control, .input-group, .dropdown-menu {
     border-radius: 0 !important;
 }
 
-/* Remove gaps between containers */
+
 .row.g-0 > .col-lg-8,
 .row.g-0 > .col-xl-9,
 .row.g-0 > .col-lg-4,
@@ -284,6 +410,10 @@ section:last-of-type .badge.bg-secondary {
 
 .container-fluid {
     padding: 0;
+}
+
+.container {
+    position: relative;
 }
 
 section {
@@ -299,7 +429,7 @@ section {
     margin: 0;
 }
 
-/* Fix for any potential white gaps */
+
 html, body {
     background-color: #001f3f;
 }
@@ -308,7 +438,7 @@ html, body {
     padding: 0;
 }
 
-/* Override Bootstrap table backgrounds */
+
 .table, 
 .table-hover,
 .table-striped,
@@ -321,12 +451,15 @@ html, body {
     background-color: transparent !important;
 }
 
-/* Enhanced Navbar Styling */
+
 .custom-navbar {
-    background: linear-gradient(to right, #001428, #00264d);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 0.7rem 0;
-    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    background: linear-gradient(to right, #001428, #003366);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 0.6rem 0;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.4);
+    position: relative;
+    z-index: 1030;
+    min-height: 64px;
 }
 
 .navbar-brand {
@@ -336,25 +469,62 @@ html, body {
     padding: 0;
     color: #ffffff !important;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    min-width: 220px;
+}
+
+.navbar-brand span {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.7px;
 }
 
 .navbar-brand:hover {
     transform: translateY(-1px);
 }
 
+.navbar .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+
 .brand-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4);
+    border: 1px solid rgba(59, 130, 246, 0.6);
+    transition: all 0.3s ease;
 }
 
-.navbar-brand .bi {
-    font-size: 1.1rem;
+@keyframes pulse {
+    0% {
+        box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.7);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4);
+        transform: scale(1);
+    }
+}
+
+.pulse-animation {
+    animation: pulse 1s ease;
+}
+
+.brand-icon .bi {
+    font-size: 1.5rem;
     color: white;
 }
 
@@ -363,50 +533,54 @@ html, body {
     margin: 0 0.2rem;
 }
 
-.navbar-dark .navbar-nav .nav-link {
+.navbar-nav.nav-pills {
+    gap: 8px;
+}
+
+.navbar-nav.nav-pills .nav-link {
     color: rgba(255, 255, 255, 0.85);
-    font-weight: 500;
-    padding: 0.6rem 1rem;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: all 0.25s ease;
+    padding: 0.5rem 1.2rem;
+    white-space: nowrap;
 }
 
-.navbar-dark .navbar-nav .nav-link:hover {
-    color: #ffffff;
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.navbar-dark .navbar-nav .nav-link.active {
+.navbar-nav.nav-pills .nav-link:hover {
     color: #ffffff;
     background-color: rgba(59, 130, 246, 0.15);
-    position: relative;
 }
 
-.navbar-dark .navbar-nav .nav-link.active:after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    height: 2px;
-    background-color: #3b82f6;
-    border-radius: 2px;
+.navbar-nav.nav-pills .nav-link.active {
+    color: #ffffff;
+    background-color: rgba(59, 130, 246, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .navbar-status {
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-    margin-left: 0.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(59, 130, 246, 0.15);
+    padding: 0.4rem 1rem;
+    border-radius: 6px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    margin-right: 15px;
+    min-width: 220px;
+    text-align: right;
+}
+
+.navbar-status:hover {
+    background-color: rgba(59, 130, 246, 0.25);
+    border-color: rgba(59, 130, 246, 0.5);
 }
 
 .navbar-text {
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-size: 0.85rem;
-    font-weight: 500;
-    letter-spacing: 0.02rem;
+    color: rgba(255, 255, 255, 1) !important;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05rem;
 }
 
 .custom-toggler {
@@ -420,22 +594,52 @@ html, body {
 }
 
 @media (max-width: 991.98px) {
-    .navbar-nav {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        margin-top: 0.5rem;
-    }
-    
     .navbar-status {
-        margin-top: 0.5rem;
-        text-align: center;
-        width: 100%;
-        margin-left: 0;
+        margin-right: 0.5rem;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+        min-width: auto;
     }
     
-    .navbar-collapse {
-        padding-bottom: 0.5rem;
+    .navbar-brand {
+        min-width: auto;
+        margin-left: 5px;
+    }
+    
+    .brand-icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 0.5rem;
+    }
+    
+    .navbar-nav.nav-pills .nav-link {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .navbar-nav.nav-pills {
+        gap: 4px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .navbar-nav.nav-pills {
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .custom-navbar .container-fluid {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .navbar-brand, .navbar-status {
+        margin-bottom: 6px;
+    }
+    
+    .custom-navbar {
+        padding: 8px 0;
+        height: auto;
     }
 }
 
@@ -475,7 +679,7 @@ footer {
     }
 }
 
-/* Status indicators */
+
 .badge.bg-success {
     background-color: #10b981 !important;
 }
@@ -492,7 +696,7 @@ footer {
     background-color: #3b82f6 !important;
 }
 
-/* Network Map Styles */
+
 .network-map-container {
     position: relative;
     width: 100%;
@@ -503,7 +707,7 @@ footer {
     background: linear-gradient(145deg, #001528, #002b59);
     transition: all 0.3s ease;
     cursor: default;
-    user-select: none; /* Prevent text selection during drag */
+    user-select: none;
 }
 
 #network-map {
@@ -699,7 +903,7 @@ footer {
     font-weight: 500;
 }
 
-/* Map controls */
+
 .map-controls {
     position: absolute;
     bottom: 20px;
