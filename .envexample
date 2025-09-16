@@ -1,0 +1,7 @@
+# Configurações de Conexão com a API do Zabbix
+ZABBIX_SERVER=
+ZABBIX_USER=
+ZABBIX_PASSWORD=
+
+# (Opcional) Chave secreta do Flask para mensagens flash
+FLASK_SECRET_KEY=
