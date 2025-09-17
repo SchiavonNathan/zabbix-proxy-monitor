@@ -150,6 +150,261 @@ h1, h2, h3, h4, h5 {
     color: rgba(255, 255, 255, 0.6);
 }
 
+/* Estilos para o gerenciamento de layouts */
+.layout-dropdown {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+}
+
+.layout-btn {
+    background-color: rgba(0, 31, 63, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.layout-btn:hover {
+    background-color: rgba(0, 47, 95, 0.9);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.layout-btn i {
+    margin-right: 5px;
+}
+
+.layout-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.layout-modal-content {
+    background-color: #001f3f;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    padding: 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.layout-modal-header {
+    background-color: #002746;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.layout-modal-title {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.layout-modal-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.layout-modal-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.layout-modal-body {
+    padding: 20px;
+}
+
+.layout-form-group {
+    margin-bottom: 15px;
+}
+
+.layout-form-group label {
+    display: block;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.layout-input {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: white;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.layout-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.layout-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.layout-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+}
+
+.layout-item:last-child {
+    border-bottom: none;
+}
+
+.layout-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.layout-item-name {
+    color: white;
+    font-size: 0.9rem;
+}
+
+.layout-item-info {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+.layout-item-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.layout-action-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.layout-action-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.layout-action-btn.delete:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.layout-modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.layout-btn-secondary {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.layout-btn-secondary:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.layout-btn-primary {
+    background-color: #3b82f6;
+    border: 1px solid #2563eb;
+    color: white;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.layout-btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.layout-empty {
+    padding: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+}
+
+/* Estilo para o botão de gerenciar layouts na interface do mapa */
+.map-layout-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 31, 63, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 100;
+}
+
+.map-layout-button:hover {
+    background-color: rgba(0, 47, 95, 0.9);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.map-layout-button i {
+    margin-right: 5px;
+}
+
 
 .chart-container {
     background-color: #002746;

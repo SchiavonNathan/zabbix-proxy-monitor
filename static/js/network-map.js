@@ -5,6 +5,148 @@ document.addEventListener('DOMContentLoaded', function() {
     const ctx = canvas.getContext('2d');
     let width = canvas.width = canvas.offsetWidth;
     let height = canvas.height = canvas.offsetHeight;
+    
+    // Funções para gerenciar layouts salvos
+    const LAYOUT_STORAGE_KEY = 'zabbix_proxy_positions';
+    const LAYOUT_LIST_KEY = 'zabbix_saved_layouts';
+    
+    function saveCurrentLayout(layoutName) {
+        if (!positions || !positions.proxies || !Array.isArray(positions.proxies)) {
+            alert('Não há proxies para salvar!');
+            return false;
+        }
+        
+        try {
+            // Criar um objeto com nomes de proxies como chaves e posições como valores
+            const positionData = {};
+            positions.proxies.forEach(proxy => {
+                positionData[proxy.name] = {
+                    x: proxy.x / width,  // Armazenar como percentuais para ser responsivo
+                    y: proxy.y / height
+                };
+            });
+            
+            // Obter a lista de layouts salvos
+            const savedLayouts = getSavedLayoutsList();
+            
+            // Adicionar ou atualizar este layout na lista
+            savedLayouts[layoutName] = {
+                name: layoutName,
+                timestamp: new Date().toISOString(),
+                proxyCount: positions.proxies.length
+            };
+            
+            // Salvar a lista atualizada
+            localStorage.setItem(LAYOUT_LIST_KEY, JSON.stringify(savedLayouts));
+            
+            // Salvar o layout atual
+            localStorage.setItem(`${LAYOUT_STORAGE_KEY}_${layoutName}`, JSON.stringify(positionData));
+            
+            return true;
+        } catch (e) {
+            console.error('Erro ao salvar layout:', e);
+            return false;
+        }
+    }
+    
+    function loadLayout(layoutName) {
+        try {
+            const layoutKey = `${LAYOUT_STORAGE_KEY}_${layoutName}`;
+            const savedLayout = localStorage.getItem(layoutKey);
+            
+            if (!savedLayout) {
+                alert(`Layout "${layoutName}" não encontrado!`);
+                return false;
+            }
+            
+            // Definir este layout como o atual
+            localStorage.setItem(LAYOUT_STORAGE_KEY, savedLayout);
+            
+            // Aplicar o layout diretamente sem recarregar a página
+            const savedPositions = JSON.parse(savedLayout);
+            
+            // Atualizar as posições dos nós
+            if (positions && positions.proxies && Array.isArray(positions.proxies)) {
+                positions.proxies.forEach(proxy => {
+                    if (savedPositions[proxy.name]) {
+                        proxy.x = savedPositions[proxy.name].x * width;
+                        proxy.y = savedPositions[proxy.name].y * height;
+                    }
+                });
+                
+                // Redesenhar o mapa com as novas posições
+                drawMap();
+                console.log(`Layout "${layoutName}" aplicado com sucesso!`);
+                return true;
+            } else {
+                console.error('Erro ao aplicar layout: posições não inicializadas');
+                return false;
+            }
+        } catch (e) {
+            console.error('Erro ao carregar layout:', e);
+            return false;
+        }
+    }
+    
+    function deleteLayout(layoutName) {
+        try {
+            // Remover o layout específico
+            localStorage.removeItem(`${LAYOUT_STORAGE_KEY}_${layoutName}`);
+            
+            // Atualizar a lista de layouts
+            const savedLayouts = getSavedLayoutsList();
+            delete savedLayouts[layoutName];
+            localStorage.setItem(LAYOUT_LIST_KEY, JSON.stringify(savedLayouts));
+            
+            return true;
+        } catch (e) {
+            console.error('Erro ao excluir layout:', e);
+            return false;
+        }
+    }
+    
+    function getSavedLayoutsList() {
+        try {
+            const savedLayouts = localStorage.getItem(LAYOUT_LIST_KEY);
+            return savedLayouts ? JSON.parse(savedLayouts) : {};
+        } catch (e) {
+            console.error('Erro ao carregar lista de layouts:', e);
+            return {};
+        }
+    }
+    
+    function saveProxyPositions() {
+        try {
+            if (!positions || !positions.proxies || !Array.isArray(positions.proxies) || positions.proxies.length === 0) {
+                console.warn('Não há proxies para salvar');
+                return;
+            }
+            
+            // Criar um objeto com nomes de proxies como chaves e posições como valores
+            const positionData = {};
+            positions.proxies.forEach(proxy => {
+                positionData[proxy.name] = {
+                    x: proxy.x / width,  // Armazenar como percentuais para ser responsivo
+                    y: proxy.y / height
+                };
+            });
+            
+            // Salvar no localStorage
+            localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(positionData));
+        } catch (e) {
+            console.error('Erro ao salvar posições dos proxies:', e);
+        }
+    }
+    
+    function loadProxyPositions() {
+        try {
+            const savedPositions = localStorage.getItem(LAYOUT_STORAGE_KEY);
+            return savedPositions ? JSON.parse(savedPositions) : {};
+        } catch (e) {
+            console.error('Erro ao carregar posições dos proxies:', e);
+            return {};
+        }
+    }
 
     window.addEventListener('resize', function() {
         width = canvas.width = canvas.offsetWidth;
@@ -46,82 +188,100 @@ document.addEventListener('DOMContentLoaded', function() {
         const proxyNodes = [];
         const nodeRadius = 24; 
         const minDistanceBetweenNodes = nodeRadius * 2.8;
-        const baseAngleStep = (2 * Math.PI) / proxyData.length;
+        
+        // Carregar posições salvas
+        const savedPositions = loadProxyPositions();
+        const hasSavedPositions = Object.keys(savedPositions).length > 0;
+        
+        console.log('Posições salvas carregadas:', hasSavedPositions ? 'Sim' : 'Não', savedPositions);
         
         proxyData.forEach((proxy, index) => {
-            const angle = index * baseAngleStep;
+            let x, y;
             
-            const maxDistanceFactor = 0.9;
-            const distanceFactor = Math.min(0.65 + (index / proxyData.length) * 0.35, maxDistanceFactor);
-            
-            let x = centerX + radiusX * distanceFactor * Math.cos(angle);
-            let y = centerY + radiusY * distanceFactor * Math.sin(angle);
-            
-            const checkOverlap = () => {
-                const distToServer = Math.sqrt(
-                    Math.pow(x - serverNode.x, 2) + 
-                    Math.pow(y - serverNode.y, 2)
-                );
+            // Verificar se tem posição salva para este proxy
+            if (hasSavedPositions && savedPositions[proxy.name]) {
+                // Usar posições salvas (convertendo de percentual para pixels)
+                x = savedPositions[proxy.name].x * width;
+                y = savedPositions[proxy.name].y * height;
+                console.log(`Usando posição salva para ${proxy.name}: (${x}, ${y})`);
+            } else {
+                // Calcular posição padrão se não tiver posição salva
+                const baseAngleStep = (2 * Math.PI) / proxyData.length;
+                const angle = index * baseAngleStep;
                 
-                if (distToServer < serverNode.radius + nodeRadius + 10) {
-                    return true; 
-                }
+                const maxDistanceFactor = 0.9;
+                const distanceFactor = Math.min(0.65 + (index / proxyData.length) * 0.35, maxDistanceFactor);
                 
-                return proxyNodes.some(existingNode => {
-                    const dist = Math.sqrt(
-                        Math.pow(x - existingNode.x, 2) + 
-                        Math.pow(y - existingNode.y, 2)
-                    );
-                    return dist < minDistanceBetweenNodes;
-                });
-            };
-            
-            const checkOutOfBounds = () => {
-                const padding = nodeRadius * 1.2; 
-                return (
-                    x < padding || 
-                    x > width - padding || 
-                    y < padding || 
-                    y > height - padding
-                );
-            };
-            
-            if (checkOverlap() || checkOutOfBounds()) {
-                for (let attempt = 1; attempt <= 10; attempt++) {
-                    const maxAdjustment = 0.05 * attempt;
-                    const adjustedDistanceFactor = Math.min(
-                        distanceFactor + maxAdjustment,
-                        0.85
+                x = centerX + radiusX * distanceFactor * Math.cos(angle);
+                y = centerY + radiusY * distanceFactor * Math.sin(angle);
+                
+                const checkOverlap = () => {
+                    const distToServer = Math.sqrt(
+                        Math.pow(x - serverNode.x, 2) + 
+                        Math.pow(y - serverNode.y, 2)
                     );
                     
-                    x = centerX + radiusX * adjustedDistanceFactor * Math.cos(angle);
-                    y = centerY + radiusY * adjustedDistanceFactor * Math.sin(angle);
-                    
-                    if (!checkOverlap() && !checkOutOfBounds()) {
-                        break; 
+                    if (distToServer < serverNode.radius + nodeRadius + 10) {
+                        return true; 
                     }
                     
-                    if (attempt > 5) {
-                        const angleAdjust = (attempt - 5) * 0.03;
-                        x = centerX + radiusX * adjustedDistanceFactor * Math.cos(angle + angleAdjust);
-                        y = centerY + radiusY * adjustedDistanceFactor * Math.sin(angle + angleAdjust);
+                    return proxyNodes.some(existingNode => {
+                        const dist = Math.sqrt(
+                            Math.pow(x - existingNode.x, 2) + 
+                            Math.pow(y - existingNode.y, 2)
+                        );
+                        return dist < minDistanceBetweenNodes;
+                    });
+                };
+                
+                const checkOutOfBounds = () => {
+                    const padding = nodeRadius * 1.2; 
+                    return (
+                        x < padding || 
+                        x > width - padding || 
+                        y < padding || 
+                        y > height - padding
+                    );
+                };
+                
+                if (checkOverlap() || checkOutOfBounds()) {
+                    for (let attempt = 1; attempt <= 10; attempt++) {
+                        const maxAdjustment = 0.05 * attempt;
+                        const adjustedDistanceFactor = Math.min(
+                            distanceFactor + maxAdjustment,
+                            0.85
+                        );
+                        
+                        x = centerX + radiusX * adjustedDistanceFactor * Math.cos(angle);
+                        y = centerY + radiusY * adjustedDistanceFactor * Math.sin(angle);
                         
                         if (!checkOverlap() && !checkOutOfBounds()) {
-                            break;
+                            break; 
                         }
                         
-                        x = centerX + radiusX * adjustedDistanceFactor * Math.cos(angle - angleAdjust);
-                        y = centerY + radiusY * adjustedDistanceFactor * Math.sin(angle - angleAdjust);
-                        
-                        if (!checkOverlap() && !checkOutOfBounds()) {
-                            break;
+                        if (attempt > 5) {
+                            const angleAdjust = (attempt - 5) * 0.03;
+                            x = centerX + radiusX * adjustedDistanceFactor * Math.cos(angle + angleAdjust);
+                            y = centerY + radiusY * adjustedDistanceFactor * Math.sin(angle + angleAdjust);
+                            
+                            if (!checkOverlap() && !checkOutOfBounds()) {
+                                break;
+                            }
+                            
+                            x = centerX + radiusX * adjustedDistanceFactor * Math.cos(angle - angleAdjust);
+                            y = centerY + radiusY * adjustedDistanceFactor * Math.sin(angle - angleAdjust);
+                            
+                            if (!checkOverlap() && !checkOutOfBounds()) {
+                                break;
+                            }
                         }
                     }
                 }
-                
-                x = Math.max(nodeRadius, Math.min(width - nodeRadius, x));
-                y = Math.max(nodeRadius, Math.min(height - nodeRadius, y));
             }
+            
+            // Garantir que o nó está dentro dos limites do canvas
+            x = Math.max(nodeRadius, Math.min(width - nodeRadius, x));
+            y = Math.max(nodeRadius, Math.min(height - nodeRadius, y));
             
             proxyNodes.push({
                 x: x,
@@ -685,8 +845,153 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    function handleMouseUp() {
+        if (isDragging) {
+            canvas.style.cursor = lastHoveredNode ? 'grab' : 'default';
+            isDragging = false;
+            draggedNode = null;
+            
+            // Salvar posições após arrastar e soltar
+            saveProxyPositions();
+            
+            drawMap();
+        }
+    }
+    
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('mousedown', handleMouseDown);
     canvas.addEventListener('mouseup', handleMouseUp);
     canvas.addEventListener('mouseleave', handleMouseLeave);
+    
+    // Implementar os controles de gerenciamento de layout
+    const layoutModal = document.getElementById('layout-modal');
+    const layoutButton = document.getElementById('map-layout-button');
+    const layoutCloseBtn = document.getElementById('layout-modal-close');
+    const layoutCloseBtn2 = document.getElementById('layout-close-btn');
+    const layoutNameInput = document.getElementById('layout-name');
+    const layoutSaveBtn = document.getElementById('layout-save-btn');
+    const layoutResetBtn = document.getElementById('layout-reset-btn');
+    const layoutList = document.getElementById('layout-list');
+    
+    // Função para abrir modal
+    function openLayoutModal() {
+        layoutModal.style.display = 'flex';
+        refreshLayoutList();
+        layoutNameInput.focus();
+    }
+    
+    // Função para fechar modal
+    function closeLayoutModal() {
+        layoutModal.style.display = 'none';
+    }
+    
+    // Função para renderizar a lista de layouts
+    function refreshLayoutList() {
+        const layouts = getSavedLayoutsList();
+        layoutList.innerHTML = '';
+        
+        if (Object.keys(layouts).length === 0) {
+            layoutList.innerHTML = '<div class="layout-empty">Nenhum layout salvo ainda</div>';
+            return;
+        }
+        
+        Object.values(layouts).forEach(layout => {
+            const date = new Date(layout.timestamp);
+            const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+            
+            const layoutItem = document.createElement('div');
+            layoutItem.className = 'layout-item';
+            layoutItem.innerHTML = `
+                <div class="layout-item-content">
+                    <div class="layout-item-name">${layout.name}</div>
+                    <div class="layout-item-info">
+                        <i class="bi bi-clock-history me-1"></i>${formattedDate} 
+                        <i class="bi bi-hdd-network ms-2 me-1"></i>${layout.proxyCount} proxies
+                    </div>
+                </div>
+                <div class="layout-item-actions">
+                    <button class="layout-action-btn load" title="Carregar layout">
+                        <i class="bi bi-box-arrow-in-down"></i>
+                    </button>
+                    <button class="layout-action-btn delete" title="Excluir layout">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            const loadBtn = layoutItem.querySelector('.load');
+            loadBtn.addEventListener('click', () => {
+                if (confirm(`Carregar o layout "${layout.name}"? As posições atuais serão substituídas.`)) {
+                    loadLayout(layout.name);
+                }
+            });
+            
+            const deleteBtn = layoutItem.querySelector('.delete');
+            deleteBtn.addEventListener('click', () => {
+                if (confirm(`Excluir o layout "${layout.name}"? Esta ação não pode ser desfeita.`)) {
+                    deleteLayout(layout.name);
+                    refreshLayoutList();
+                }
+            });
+            
+            layoutList.appendChild(layoutItem);
+        });
+    }
+    
+    // Função para resetar posições (remover posições salvas)
+    function resetPositions() {
+        if (confirm('Resetar as posições dos proxies para o padrão? Esta ação não pode ser desfeita.')) {
+            localStorage.removeItem(LAYOUT_STORAGE_KEY);
+            location.reload();
+        }
+    }
+    
+    // Event listeners para controles de layout
+    if (layoutButton) {
+        layoutButton.addEventListener('click', openLayoutModal);
+    }
+    
+    if (layoutCloseBtn) {
+        layoutCloseBtn.addEventListener('click', closeLayoutModal);
+    }
+    
+    if (layoutCloseBtn2) {
+        layoutCloseBtn2.addEventListener('click', closeLayoutModal);
+    }
+    
+    if (layoutSaveBtn) {
+        layoutSaveBtn.addEventListener('click', () => {
+            const layoutName = layoutNameInput.value.trim();
+            
+            if (!layoutName) {
+                alert('Por favor, digite um nome para o layout.');
+                layoutNameInput.focus();
+                return;
+            }
+            
+            const layouts = getSavedLayoutsList();
+            if (layouts[layoutName] && !confirm(`Já existe um layout chamado "${layoutName}". Deseja sobrescrever?`)) {
+                return;
+            }
+            
+            if (saveCurrentLayout(layoutName)) {
+                alert(`Layout "${layoutName}" salvo com sucesso!`);
+                layoutNameInput.value = '';
+                refreshLayoutList();
+            } else {
+                alert('Erro ao salvar o layout. Por favor, tente novamente.');
+            }
+        });
+    }
+    
+    if (layoutResetBtn) {
+        layoutResetBtn.addEventListener('click', resetPositions);
+    }
+    
+    // Fechar modal clicando fora
+    window.addEventListener('click', (event) => {
+        if (event.target === layoutModal) {
+            closeLayoutModal();
+        }
+    });
 });
