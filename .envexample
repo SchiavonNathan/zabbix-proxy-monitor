@@ -3,5 +3,11 @@ ZABBIX_SERVER=
 ZABBIX_USER=
 ZABBIX_PASSWORD=
 
-# (Opcional) Chave secreta do Flask para mensagens flash
+# Chave secreta do Flask para mensagens flash (obrigatório para produção)
 FLASK_SECRET_KEY=
+
+# Configuração de ambiente (development ou production)
+FLASK_ENV=production
+
+# Porta para a aplicação (opcional, padrão 5001)
+PORT=5001

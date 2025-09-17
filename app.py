@@ -110,5 +110,13 @@ def dashboard():
 
 
 if __name__ == '__main__':
-    app.logger.info("Aplicação iniciada em modo de debug.")
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    # Verifica se está em modo de produção
+    production = os.getenv('FLASK_ENV') == 'production'
+    if production:
+        app.logger.info("Aplicação iniciada em modo de produção.")
+        # Em produção, não ative o debug e limite o host apenas se necessário
+        port = int(os.getenv('PORT', 5001))
+        app.run(debug=False, host='0.0.0.0', port=port)
+    else:
+        app.logger.info("Aplicação iniciada em modo de desenvolvimento.")
+        app.run(debug=True, host='0.0.0.0', port=5001)

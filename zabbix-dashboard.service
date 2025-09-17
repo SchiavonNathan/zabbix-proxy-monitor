@@ -1,0 +1,14 @@
+[Unit]
+Description=Zabbix Proxy Dashboard
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/zabbix-dashboards
+Environment="PATH=/var/www/zabbix-dashboards/venv/bin"
+Environment="FLASK_ENV=production"
+ExecStart=/var/www/zabbix-dashboards/venv/bin/gunicorn --config gunicorn_config.py wsgi:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
