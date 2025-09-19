@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let width = canvas.width = canvas.offsetWidth;
     let height = canvas.height = canvas.offsetHeight;
     
-    // Funções para gerenciar layouts salvos
     const LAYOUT_STORAGE_KEY = 'zabbix_proxy_positions';
     const LAYOUT_LIST_KEY = 'zabbix_saved_layouts';
     
@@ -17,29 +16,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         try {
-            // Criar um objeto com nomes de proxies como chaves e posições como valores
             const positionData = {};
             positions.proxies.forEach(proxy => {
                 positionData[proxy.name] = {
-                    x: proxy.x / width,  // Armazenar como percentuais para ser responsivo
+                    x: proxy.x / width, 
                     y: proxy.y / height
                 };
             });
             
-            // Obter a lista de layouts salvos
             const savedLayouts = getSavedLayoutsList();
             
-            // Adicionar ou atualizar este layout na lista
             savedLayouts[layoutName] = {
                 name: layoutName,
                 timestamp: new Date().toISOString(),
                 proxyCount: positions.proxies.length
             };
             
-            // Salvar a lista atualizada
             localStorage.setItem(LAYOUT_LIST_KEY, JSON.stringify(savedLayouts));
             
-            // Salvar o layout atual
             localStorage.setItem(`${LAYOUT_STORAGE_KEY}_${layoutName}`, JSON.stringify(positionData));
             
             return true;
@@ -59,13 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            // Definir este layout como o atual
             localStorage.setItem(LAYOUT_STORAGE_KEY, savedLayout);
             
-            // Aplicar o layout diretamente sem recarregar a página
             const savedPositions = JSON.parse(savedLayout);
             
-            // Atualizar as posições dos nós
             if (positions && positions.proxies && Array.isArray(positions.proxies)) {
                 positions.proxies.forEach(proxy => {
                     if (savedPositions[proxy.name]) {
@@ -74,7 +65,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 
-                // Redesenhar o mapa com as novas posições
                 drawMap();
                 console.log(`Layout "${layoutName}" aplicado com sucesso!`);
                 return true;
@@ -90,10 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function deleteLayout(layoutName) {
         try {
-            // Remover o layout específico
             localStorage.removeItem(`${LAYOUT_STORAGE_KEY}_${layoutName}`);
             
-            // Atualizar a lista de layouts
             const savedLayouts = getSavedLayoutsList();
             delete savedLayouts[layoutName];
             localStorage.setItem(LAYOUT_LIST_KEY, JSON.stringify(savedLayouts));
@@ -122,16 +110,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Criar um objeto com nomes de proxies como chaves e posições como valores
             const positionData = {};
             positions.proxies.forEach(proxy => {
                 positionData[proxy.name] = {
-                    x: proxy.x / width,  // Armazenar como percentuais para ser responsivo
+                    x: proxy.x / width, 
                     y: proxy.y / height
                 };
             });
             
-            // Salvar no localStorage
             localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(positionData));
         } catch (e) {
             console.error('Erro ao salvar posições dos proxies:', e);
@@ -189,7 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const nodeRadius = 24; 
         const minDistanceBetweenNodes = nodeRadius * 2.8;
         
-        // Carregar posições salvas
         const savedPositions = loadProxyPositions();
         const hasSavedPositions = Object.keys(savedPositions).length > 0;
         
@@ -198,14 +183,11 @@ document.addEventListener('DOMContentLoaded', function() {
         proxyData.forEach((proxy, index) => {
             let x, y;
             
-            // Verificar se tem posição salva para este proxy
             if (hasSavedPositions && savedPositions[proxy.name]) {
-                // Usar posições salvas (convertendo de percentual para pixels)
                 x = savedPositions[proxy.name].x * width;
                 y = savedPositions[proxy.name].y * height;
                 console.log(`Usando posição salva para ${proxy.name}: (${x}, ${y})`);
             } else {
-                // Calcular posição padrão se não tiver posição salva
                 const baseAngleStep = (2 * Math.PI) / proxyData.length;
                 const angle = index * baseAngleStep;
                 
@@ -279,7 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Garantir que o nó está dentro dos limites do canvas
             x = Math.max(nodeRadius, Math.min(width - nodeRadius, x));
             y = Math.max(nodeRadius, Math.min(height - nodeRadius, y));
             
@@ -851,7 +832,6 @@ document.addEventListener('DOMContentLoaded', function() {
             isDragging = false;
             draggedNode = null;
             
-            // Salvar posições após arrastar e soltar
             saveProxyPositions();
             
             drawMap();
@@ -863,7 +843,6 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.addEventListener('mouseup', handleMouseUp);
     canvas.addEventListener('mouseleave', handleMouseLeave);
     
-    // Implementar os controles de gerenciamento de layout
     const layoutModal = document.getElementById('layout-modal');
     const layoutButton = document.getElementById('map-layout-button');
     const layoutCloseBtn = document.getElementById('layout-modal-close');
@@ -873,19 +852,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const layoutResetBtn = document.getElementById('layout-reset-btn');
     const layoutList = document.getElementById('layout-list');
     
-    // Função para abrir modal
     function openLayoutModal() {
         layoutModal.style.display = 'flex';
         refreshLayoutList();
         layoutNameInput.focus();
     }
     
-    // Função para fechar modal
     function closeLayoutModal() {
         layoutModal.style.display = 'none';
     }
     
-    // Função para renderizar a lista de layouts
     function refreshLayoutList() {
         const layouts = getSavedLayoutsList();
         layoutList.innerHTML = '';
@@ -938,7 +914,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Função para resetar posições (remover posições salvas)
     function resetPositions() {
         if (confirm('Resetar as posições dos proxies para o padrão? Esta ação não pode ser desfeita.')) {
             localStorage.removeItem(LAYOUT_STORAGE_KEY);
@@ -946,7 +921,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Event listeners para controles de layout
     if (layoutButton) {
         layoutButton.addEventListener('click', openLayoutModal);
     }
@@ -988,7 +962,6 @@ document.addEventListener('DOMContentLoaded', function() {
         layoutResetBtn.addEventListener('click', resetPositions);
     }
     
-    // Fechar modal clicando fora
     window.addEventListener('click', (event) => {
         if (event.target === layoutModal) {
             closeLayoutModal();
