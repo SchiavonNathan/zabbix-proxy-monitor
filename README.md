@@ -2,6 +2,12 @@
 
 Dashboard para monitoramento de proxies do Zabbix.
 
+![Dashboard do Zabbix Proxy](./static/public/1-prx.jpg)
+
+Um dashboard moderno e interativo para monitoramento de proxies do Zabbix, oferecendo visualização em tempo real do status dos proxies, dados estatísticos e gerenciamento de layouts personalizados.
+
+![Estatísticas dos Proxies](./static/public/2-prx.jpg)
+
 ## Configuração para Produção
 
 ### Pré-requisitos
@@ -12,8 +18,8 @@ Dashboard para monitoramento de proxies do Zabbix.
 
 1. Clone o repositório:
 ```
-git clone https://github.com/SchiavonNathan/zabbix-dashboards.git
-cd zabbix-dashboards
+git clone https://github.com/SchiavonNathan/zabbix-proxy-monitor.git
+cd zabbix-proxy-monitor
 ```
 
 2. Crie um ambiente virtual e ative-o:
@@ -87,66 +93,59 @@ sudo systemctl start zabbix-dashboard
 sudo systemctl enable zabbix-dashboard
 ```
 
-### Configuração com Nginx (Proxy Reverso)
+## Execução com Docker Compose
 
-É recomendado usar o Nginx como proxy reverso na frente da aplicação.
+### Pré-requisitos
+- Docker
+- Docker Compose
 
-1. Instale o Nginx:
-```
-sudo apt update
-sudo apt install nginx
-```
+### Passos para execução
 
-2. Crie um arquivo de configuração para o site:
+1. Certifique-se de ter um arquivo `.env` configurado corretamente com suas credenciais do Zabbix:
 ```
-sudo nano /etc/nginx/sites-available/zabbix-dashboard
+cp .envexample .env
 ```
 
-3. Adicione a configuração:
+2. Edite o arquivo `.env` com suas configurações:
 ```
-server {
-    listen 80;
-    server_name dashboard.exemplo.com;  # Altere para seu domínio
-
-    location / {
-        proxy_pass http://localhost:5001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
+ZABBIX_SERVER=https://seu-servidor-zabbix.com
+ZABBIX_USER=seu_usuario
+ZABBIX_PASSWORD=sua_senha
+FLASK_SECRET_KEY=uma_chave_secreta_aleatoria
 ```
 
-4. Habilite o site:
+3. Execute o Docker Compose:
 ```
-sudo ln -s /etc/nginx/sites-available/zabbix-dashboard /etc/nginx/sites-enabled/
-sudo systemctl reload nginx
+docker-compose up -d
 ```
 
-### Configuração com IIS (Windows Server)
+4. Acesse o dashboard em seu navegador:
+```
+http://localhost:5001
+```
 
-1. Instale o módulo URL Rewrite no IIS.
+### Gerenciamento do Docker
 
-2. Crie um novo site no IIS apontando para a pasta da aplicação.
+- Verificar logs do contêiner:
+```
+docker-compose logs -f
+```
 
-3. Configure o Reverse Proxy:
-   - Na página inicial do IIS, abra URL Rewrite
-   - Adicione uma nova regra de Reverse Proxy
-   - Configure para encaminhar solicitações para http://localhost:5001
+- Parar os contêineres:
+```
+docker-compose down
+```
 
-## Segurança
+- Reiniciar após alterações:
+```
+docker-compose up -d --build
+```
 
-- Sempre use HTTPS em produção
-- Gere uma chave secreta forte para a variável FLASK_SECRET_KEY
-- Restrinja o acesso ao dashboard conforme necessário
-- Considere adicionar autenticação adicional
+## Funcionalidades Principais
 
-## Atualizações
-
-Para atualizar o dashboard:
-
-1. Pare o serviço
-2. Pull das novas alterações do repositório
-3. Atualize as dependências se necessário
-4. Reinicie o serviço
+- **Visualização em Tempo Real**: Monitoramento do status de todos os proxies conectados
+- **Mapa de Rede Interativo**: Visualização gráfica dos proxies com status por cores
+- **Layouts Personalizáveis**: Salve e carregue diferentes organizações de layout
+- **Gráficos de Performance**: Visualize o desempenho histórico dos proxies
+- **Responsivo**: Interface adaptável a diferentes tamanhos de tela
+```
